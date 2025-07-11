@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: document-comment-service
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/document_comments
+    username: postgres
+    password: secret
+    driver-class-name: org.postgresql.Driver
+  # JPA Configuration
+  jpa:
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        generate_statistics: true
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    am.hhovhann.document_comment_service.service: DEBUG
+  
+# Server Configuration
+server:
+  port: 8080
+# Swagger Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

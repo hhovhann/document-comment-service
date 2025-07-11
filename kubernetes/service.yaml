@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: doc-comment-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: document-comment-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-comment-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: document-comment-backend
+  template:
+    metadata:
+      labels:
+        app: doc-comment-app
+    spec:
+      containers:
+        - name: app
+          image: yourrepo/document-comment-backend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-service:5432/document-comment-service
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: secret

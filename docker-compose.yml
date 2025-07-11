@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: document_comments
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+# Uncomment when would be ready the backend service as a container with corrected dockerfile
+#  app:
+#    build: docker
+#    depends_on:
+#      - db
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/document_comments
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: secret
+#    ports:
+#      - "8080:8080"
