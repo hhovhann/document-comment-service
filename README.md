@@ -14,7 +14,17 @@ A complete Spring Boot backend system that allows users to create documents and 
 ## 📁 Project Structure
 
 ```
-src/main/kotlin/com/example/documentcomments/
+design/
+├── Application-Design.png
+docker/
+├── Dockerfile
+├── docker-compose.yml
+kubernates/
+├── deployment.yaml
+├── service.yaml
+postman/
+├── document-commenting.postman_collection.json
+src/main/kotlin/am/hhovhann/document_comment_service/
 ├── DocumentCommentsApplication.kt
 ├── controller/
 │   ├── DocumentController.kt
@@ -46,12 +56,8 @@ src/main/kotlin/com/example/documentcomments/
 
 
 ### Database Setup
-1. Create a PostgreSQL database:
-```sql
-CREATE DATABASE document_comments;
-```
-2. Run Postgres docker container before running the application to test it locally
-   ```docker-compose up --build```
+1. Run Postgres docker container before running the application to test it locally
+   ```cd /docker && docker-compose up --build```
 
 ### Running the Application
 
@@ -243,9 +249,8 @@ curl -X GET http://localhost:8080/api/documents/{document-id}/comments?paragraph
 - Use the json file and import in postman to test the endpoints [document-commenting.postman_collection.json](postman/document-commenting.postman_collection.json)
 
 ### Nice to Have
-- Tests (manual, load/stress, penetration, unit, integration)
-- Containerize (add containerisation for backend service and the database)
-- Add Documentation for methods more then OpenAPI
+- Tests (load/stress, penetration, unit, integration)
+- Containerize support (for backend service and the database)
 - Add Liquibase support
-- Add Logging support
+- Non Functional Requirements support
 - ETC
