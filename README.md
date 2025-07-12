@@ -71,7 +71,7 @@ The application will start on `http://localhost:8080`
 ### WIP: Install and Run the Application as a Docker Container
 
 # Install Docker Desktop for your system
-(Download Docker Desktop)[https://docs.docker.com/desktop/]
+[Download Docker Desktop](https://docs.docker.com/desktop/)
 
 # Run docker compose locally
 ```docker-compose up --build```

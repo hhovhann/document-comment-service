@@ -8,7 +8,7 @@ plugins {
 
 group = "am.hhovhann"
 version = "1.0.0-SNAPSHOT"
-val springdocOpenapiVersion: String by extra("2.2.0")
+val springdocOpenapiVersion: String by extra("2.8.9")
 
 java {
     toolchain {
