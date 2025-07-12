@@ -249,7 +249,7 @@ curl -X GET http://localhost:8080/api/documents/{document-id}/comments?paragraph
 - Use the json file and import in postman to test the endpoints [document-commenting.postman_collection.json](postman/document-commenting.postman_collection.json)
 
 ### Nice to Have
-- Tests (load/stress, penetration, unit, integration)
+- Tests (load/stress, penetration, integration)
 - Containerize support (for backend service and the database)
 - Add Liquibase support
 - Non Functional Requirements support

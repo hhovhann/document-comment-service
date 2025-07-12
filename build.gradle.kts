@@ -9,6 +9,7 @@ plugins {
 group = "am.hhovhann"
 version = "1.0.0-SNAPSHOT"
 val springdocOpenapiVersion: String by extra("2.8.9")
+val mockkVersion: String by extra("1.14.4")
 
 java {
     toolchain {
@@ -33,6 +34,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("com.h2database:h2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
