@@ -5,7 +5,9 @@ import am.hhovhann.document_comment_service.dto.DocumentResponseDto
 import am.hhovhann.document_comment_service.dto.DocumentUpdateDto
 import am.hhovhann.document_comment_service.entity.Document
 import am.hhovhann.document_comment_service.exception.DocumentNotFoundException
+import am.hhovhann.document_comment_service.exception.OptimisticLockingException
 import am.hhovhann.document_comment_service.repository.DocumentRepository
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -48,13 +50,27 @@ class DocumentService(
     }
 
     fun updateDocument(id: UUID, updateDto: DocumentUpdateDto): DocumentResponseDto {
-        logger.info("Updating document with id={}", id)
+        logger.info("Updating document with id={}, version={}", id, updateDto.version)
         val document = documentRepository.findById(id)
             .orElseThrow {
                 logger.warn("Document not found with id={}", id)
                 DocumentNotFoundException("Document not found with id: $id")
             }
 
+        // Check version for optimistic locking
+        updateDto.version?.let { expectedVersion ->
+            if (document.version != expectedVersion) {
+                logger.warn("Version conflict for document id={}. Expected: {}, Actual: {}",
+                    id, expectedVersion, document.version)
+                throw OptimisticLockingException(
+                    "Document has been modified by another user. " +
+                    "Expected version: $expectedVersion, Current version: ${document.version}. " +
+                    "Please refresh and try again."
+                )
+            }
+        }
+
+        // Apply updates
         updateDto.title?.let {
             logger.debug("Updating title to '{}'", it)
             document.title = it
@@ -64,9 +80,14 @@ class DocumentService(
             document.content = it
         }
 
-        val updatedDocument = documentRepository.save(document)
-        logger.info("Document with id={} updated successfully", updatedDocument.id)
-        return updatedDocument.toResponseDto()
+        try {
+            val updatedDocument = documentRepository.save(document)
+            logger.info("Document with id={} updated successfully to version {}", updatedDocument.id, updatedDocument.version)
+            return updatedDocument.toResponseDto()
+        } catch (e: OptimisticLockingFailureException) {
+            logger.warn("Optimistic locking failure for document id={}", id)
+            throw OptimisticLockingException("Document has been modified by another user. Please refresh and try again.")
+        }
     }
 
     fun deleteDocument(id: UUID) {
@@ -85,6 +106,7 @@ class DocumentService(
         logger.debug("Found {} documents matching title='{}'", results.size, title)
         return results.map { it.toResponseDto() }
     }
+
     private fun Document.toResponseDto(): DocumentResponseDto {
         return DocumentResponseDto(
             id = this.id!!,
@@ -92,7 +114,8 @@ class DocumentService(
             content = this.content,
             createdAt = this.createdAt,
             updatedAt = this.updatedAt,
-            commentCount = this.comments.size
+            commentCount = this.comments.size,
+            version = this.version
         )
     }
 }

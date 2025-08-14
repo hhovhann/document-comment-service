@@ -15,6 +15,10 @@ data class Document(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
+    @Version
+    @Column(name = "version", nullable = false)
+    var version: Long = 0L,
+
     @field:NotBlank(message = "Title cannot be blank")
     @field:Size(max = 255, message = "Title must be less than 255 characters")
     @Column(nullable = false)

@@ -4,9 +4,10 @@ A complete Spring Boot backend system that allows users to create documents and 
 
 ## 🛠 Tech Stack
 - **Language**: Kotlin 1.9.25
-- **Framework**: Spring Boot 3.5.3
+- **Framework**: Spring Boot 3.5.4
 - **ORM**: Hibernate / JPA
 - **Database**: PostgreSQL
+- **Database Migration**: Flyway
 - **API Docs**: Swagger
 - **Build Tool**: Gradle
 - **Java Version**: 21
@@ -56,8 +57,15 @@ src/main/kotlin/am/hhovhann/document_comment_service/
 
 
 ### Database Setup
-1. Run Postgres docker container before running the application to test it locally
-   ```cd /docker && docker-compose up --build```
+1. **Start PostgreSQL with Docker**
+   ```bash
+   cd docker && docker-compose up --build
+   ```
+
+2. **Database Migrations**
+   - Flyway automatically runs migrations on application startup
+   - Migrations are located in `src/main/resources/db/migration/`
+   - See [Flyway Migration Documentation](docs/FLYWAY_MIGRATIONS.md) for details
 
 ### Running the Application
 
@@ -249,7 +257,8 @@ curl -X GET http://localhost:8080/api/documents/{document-id}/comments?paragraph
 - Use the json file and import in postman to test the endpoints [document-commenting.postman_collection.json](postman/document-commenting.postman_collection.json)
 
 ### Nice to Have
-- Add liquibase support
+- ✅ Database migration support (Added Flyway)
+- ✅ Containerize support (Added Docker support for Database)
 - Tests (load/stress, penetration, integration: testcontainers)
-- Containerize support (for backend service and the database)
-- Made the system more scalable and redesign when expected high load
+- Made the system more scalable and re design when expected high load
+

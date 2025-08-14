@@ -11,7 +11,8 @@ data class DocumentResponseDto(
     val content: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val commentCount: Int = 0
+    val commentCount: Int = 0,
+    val version: Long
 )
 
 data class DocumentCreateDto(
@@ -27,5 +28,7 @@ data class DocumentUpdateDto(
     @field:Size(max = 255, message = "Title must be less than 255 characters")
     val title: String?,
 
-    val content: String?
+    val content: String?,
+    
+    val version: Long? = null
 )

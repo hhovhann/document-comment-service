@@ -167,7 +167,8 @@ class DocumentControllerTest {
             content = content,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now(),
-            commentCount = 0
+            commentCount = 0,
+            version = 1L
         )
     }
 }

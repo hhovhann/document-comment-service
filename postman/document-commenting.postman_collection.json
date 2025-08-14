@@ -377,6 +377,267 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Optimistic Locking Tests",
+      "item": [
+        {
+          "name": "Create Document for Concurrency Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This test creates a document and stores its ID and version for concurrency testing",
+                  "pm.test(\"Document created successfully\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('version');",
+                  "    ",
+                  "    // Store the document ID and version for subsequent tests",
+                  "    pm.collectionVariables.set('concurrency_document_id', responseJson.id);",
+                  "    pm.collectionVariables.set('concurrency_document_version', responseJson.version);",
+                  "    ",
+                  "    console.log('Document created with ID:', responseJson.id, 'Version:', responseJson.version);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Concurrency Test Document\",\n  \"content\": \"This document will be used to test concurrent updates.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "documents"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Document - Success with Version",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This test performs an update with correct version which should succeed",
+                  "pm.test(\"Update with correct version should succeed\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.title).to.eql('Updated with Version');",
+                  "    pm.expect(responseJson.version).to.be.above(parseInt(pm.collectionVariables.get('concurrency_document_version')));",
+                  "    ",
+                  "    // Store the new version",
+                  "    pm.collectionVariables.set('concurrency_document_version', responseJson.version);",
+                  "    console.log('Update successful. New version:', responseJson.version);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated with Version\",\n  \"version\": {{concurrency_document_version}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/documents/{{concurrency_document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{concurrency_document_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Document - Version Conflict (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This test attempts to update with an old version, which should fail",
+                  "pm.test(\"Update with old version should fail\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.error).to.eql('Optimistic Locking Conflict');",
+                  "    pm.expect(responseJson.message).to.include('Document has been modified by another user');",
+                  "    ",
+                  "    console.log('Update failed as expected with conflict error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This should fail due to version conflict\",\n  \"version\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/documents/{{concurrency_document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{concurrency_document_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Document - Backward Compatibility (No Version)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This test performs an update without version (backward compatibility)",
+                  "pm.test(\"Update without version should succeed\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.content).to.eql('Updated without version');",
+                  "    pm.expect(responseJson).to.have.property('version');",
+                  "    ",
+                  "    console.log('Backward compatible update successful');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated without version\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/documents/{{concurrency_document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{concurrency_document_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Document State After Updates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This test verifies the final state of the document",
+                  "pm.test(\"Final document state should be correct\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const responseJson = pm.response.json();",
+                  "    ",
+                  "    // Should have title from versioned update",
+                  "    pm.expect(responseJson.title).to.eql('Updated with Version');",
+                  "    // Should have content from backward compatible update",
+                  "    pm.expect(responseJson.content).to.eql('Updated without version');",
+                  "    // Should have a version number",
+                  "    pm.expect(responseJson).to.have.property('version');",
+                  "    ",
+                  "    console.log('Final document state verified successfully');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/documents/{{concurrency_document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{concurrency_document_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
     }
   ],
   "variable": [
@@ -388,6 +649,16 @@
     {
       "key": "document_id",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "concurrency_document_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "concurrency_document_version",
+      "value": "0",
       "type": "string"
     }
   ]
