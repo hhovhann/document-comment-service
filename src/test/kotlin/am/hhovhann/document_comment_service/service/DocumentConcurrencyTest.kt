@@ -4,7 +4,6 @@ import am.hhovhann.document_comment_service.dto.DocumentCreateDto
 import am.hhovhann.document_comment_service.dto.DocumentUpdateDto
 import am.hhovhann.document_comment_service.exception.OptimisticLockingException
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -111,30 +110,5 @@ class DocumentConcurrencyTest {
         // Version should be present and incremented
         assertNotNull(result3.version)
         assert(result3.version >= document.version)
-    }
-
-    @Test
-    fun `test update without version should work`() {
-        // Create a document
-        val createDto = DocumentCreateDto(
-            title = "No Version Test",
-            content = "Original content"
-        )
-        val document = documentService.createDocument(createDto)
-        val documentId = document.id
-
-        // Update without version (backward compatibility)
-        val updateDto = DocumentUpdateDto(
-            title = "Updated Title",
-            content = "Updated content"
-            // No version specified
-        )
-
-        val updatedDocument = documentService.updateDocument(documentId, updateDto)
-
-        // Verify the update was successful
-        assertEquals("Updated Title", updatedDocument.title)
-        assertEquals("Updated content", updatedDocument.content)
-        assertNotNull(updatedDocument.version)
     }
 }

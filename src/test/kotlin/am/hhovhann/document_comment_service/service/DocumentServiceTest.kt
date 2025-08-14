@@ -94,7 +94,7 @@ class DocumentServiceTest {
         // Given
         val documentId = UUID.randomUUID()
         val existingDocument = createMockDocument("Old Title", "Old Content")
-        val updateDto = DocumentUpdateDto(title = "Updated Title", content = "Updated Content")
+        val updateDto = DocumentUpdateDto(title = "Updated Title", content = "Updated Content", version = 0)
         val updatedDocument = createMockDocument("Updated Title", "Updated Content")
 
         every { documentRepository.findById(documentId) } returns Optional.of(existingDocument)
@@ -114,7 +114,7 @@ class DocumentServiceTest {
     fun `updateDocument should throw DocumentNotFoundException when not exists`() {
         // Given
         val documentId = UUID.randomUUID()
-        val updateDto = DocumentUpdateDto(title = "Updated Title", content = "Updated Content")
+        val updateDto = DocumentUpdateDto(title = "Updated Title", content = "Updated Content", version = 1)
         every { documentRepository.findById(documentId) } returns Optional.empty()
 
         // When & Then

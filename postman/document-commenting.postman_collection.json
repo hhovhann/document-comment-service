@@ -528,53 +528,6 @@
           "response": []
         },
         {
-          "name": "Update Document - Backward Compatibility (No Version)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "// This test performs an update without version (backward compatibility)",
-                  "pm.test(\"Update without version should succeed\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.content).to.eql('Updated without version');",
-                  "    pm.expect(responseJson).to.have.property('version');",
-                  "    ",
-                  "    console.log('Backward compatible update successful');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"content\": \"Updated without version\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/documents/{{concurrency_document_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "documents",
-                "{{concurrency_document_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Verify Document State After Updates",
           "event": [
             {

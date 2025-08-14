@@ -131,7 +131,7 @@ class DocumentControllerTest {
     fun `PUT update document should return 200 with updated document`() {
         // Given
         val documentId = UUID.randomUUID()
-        val updateDto = DocumentUpdateDto(title = "Updated Doc", content = "Updated Content")
+        val updateDto = DocumentUpdateDto(title = "Updated Doc", content = "Updated Content", version = 1)
         val updatedDocument = createMockDocumentResponse("Updated Doc", "Content")
         every { documentService.updateDocument(documentId, updateDto) } returns updatedDocument
 
