@@ -30,5 +30,5 @@ data class DocumentUpdateDto(
 
     val content: String?,
     
-    val version: Long? = null
+    val version: Long
 )
