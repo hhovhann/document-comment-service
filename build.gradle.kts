@@ -9,7 +9,7 @@ plugins {
 group = "am.hhovhann"
 version = "1.0.0-SNAPSHOT"
 val springdocOpenapiVersion: String by extra("2.8.9")
-val mockkVersion: String by extra("1.14.4")
+val mockkVersion: String by extra("1.14.5")
 
 java {
     toolchain {

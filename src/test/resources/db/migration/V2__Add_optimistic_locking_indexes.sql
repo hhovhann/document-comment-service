@@ -1,4 +1,4 @@
--- Add indexes for optimistic locking and performance optimization (H2 compatible)
+-- Add indexes for optimistic locking and performance optimization
 -- This migration adds additional indexes to improve query performance
 
 -- Add index on version for optimistic locking queries
