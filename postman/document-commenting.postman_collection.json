@@ -23,25 +23,6 @@
           "response": []
         },
         {
-          "name": "Get All Documents with Title Filter",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/documents?title=sample",
-              "host": ["{{base_url}}"],
-              "path": ["api", "documents"],
-              "query": [
-                {
-                  "key": "title",
-                  "value": "sample"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Get Document by ID",
           "request": {
             "method": "GET",
@@ -103,7 +84,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated Document Title\",\n  \"content\": \"This is the updated content of the document. The first paragraph has been revised.\\n\\nThis is the updated second paragraph with new information and improved clarity.\\n\\nThis is the updated third paragraph with additional conclusions.\"\n}"
+              "raw": "{\n  \"title\": \"Updated Document Title\",\n  \"content\": \"This is the updated content of the document. The first paragraph has been revised.\\n\\nThis is the updated second paragraph with new information and improved clarity.\\n\\nThis is the updated third paragraph with additional conclusions.\",\n \"version\": {{concurrency_document_version}}\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents/{{document_id}}",

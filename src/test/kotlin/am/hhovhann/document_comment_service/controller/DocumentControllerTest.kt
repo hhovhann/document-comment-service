@@ -63,22 +63,6 @@ class DocumentControllerTest {
     }
 
     @Test
-    fun `GET all documents with title filter should return filtered results`() {
-        // Given
-        val title = "test"
-        val documents = listOf(createMockDocumentResponse("Test Doc", "Content"))
-        every { documentService.searchDocuments(title) } returns documents
-
-        // When & Then
-        mockMvc.perform(get("/api/documents").param("title", title))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(1))
-            .andExpect(jsonPath("$[0].title").value("Test Doc"))
-
-        verify { documentService.searchDocuments(title) }
-    }
-
-    @Test
     fun `GET document by ID should return 200 when document exists`() {
         // Given
         val documentId = UUID.randomUUID()

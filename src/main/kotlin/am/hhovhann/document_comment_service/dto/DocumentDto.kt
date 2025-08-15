@@ -1,6 +1,7 @@
 package am.hhovhann.document_comment_service.dto
 
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.PositiveOrZero
 import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 import java.util.*
@@ -29,6 +30,7 @@ data class DocumentUpdateDto(
     val title: String?,
 
     val content: String?,
-    
+
+    @field:PositiveOrZero(message = "Content must be positive")
     val version: Long
 )

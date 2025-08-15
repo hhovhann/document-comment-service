@@ -15,77 +15,83 @@ import org.slf4j.LoggerFactory
 
 @Service
 @Transactional
-class DocumentService(
-    private val documentRepository: DocumentRepository
-) {
+class DocumentService(private val documentRepository: DocumentRepository) {
     private val logger = LoggerFactory.getLogger(DocumentService::class.java)
 
     fun getAllDocuments(): List<DocumentResponseDto> {
         logger.info("Fetching all documents ordered by updatedAt DESC")
         val documents = documentRepository.findAllOrderByUpdatedAtDesc()
         logger.debug("Retrieved {} documents", documents.size)
+
         return documents.map { it.toResponseDto() }
     }
 
     fun getDocumentById(id: UUID): DocumentResponseDto {
         logger.info("Fetching document with id={}", id)
-        val document = documentRepository.findById(id)
+        val document = documentRepository
+            .findById(id)
             .orElseThrow {
                 logger.warn("Document not found with id={}", id)
                 DocumentNotFoundException("Document not found with id: $id")
             }
+
         return document.toResponseDto()
     }
 
     fun createDocument(createDto: DocumentCreateDto): DocumentResponseDto {
         logger.info("Creating new document with title='{}'", createDto.title)
-
-        val document = Document(
-            title = createDto.title,
-            content = createDto.content
-        )
-        val savedDocument = documentRepository.save(document)
+        val documentToSave = Document(title = createDto.title, content = createDto.content)
+        val savedDocument = documentRepository.save(documentToSave)
         logger.info("Document created with id={}", savedDocument.id)
+
         return savedDocument.toResponseDto()
     }
 
     fun updateDocument(id: UUID, updateDto: DocumentUpdateDto): DocumentResponseDto {
         logger.info("Updating document with id={}, version={}", id, updateDto.version)
-        val document = documentRepository.findById(id)
+        val existingDocument = documentRepository.findById(id)
             .orElseThrow {
                 logger.warn("Document not found with id={}", id)
                 DocumentNotFoundException("Document not found with id: $id")
             }
 
-        // Check version for optimistic locking
-        updateDto.version?.let { expectedVersion ->
-            if (document.version != expectedVersion) {
-                logger.warn("Version conflict for document id={}. Expected: {}, Actual: {}",
-                    id, expectedVersion, document.version)
+        // Check version value for optimistic locking
+        updateDto.version.let { expectedVersion ->
+            if (existingDocument.version != expectedVersion) {
+                logger.warn(
+                    "Version conflict for document id={}. Expected: {}, Actual: {}",
+                    id,
+                    expectedVersion,
+                    existingDocument.version
+                )
                 throw OptimisticLockingException(
                     "Document has been modified by another user. " +
-                    "Expected version: $expectedVersion, Current version: ${document.version}. " +
-                    "Please refresh and try again."
+                            "Expected version: $expectedVersion, Current version: ${existingDocument.version}. " +
+                            "Please refresh and try again."
                 )
             }
         }
 
-        // Apply updates
+        // Apply Updates
         updateDto.title?.let {
             logger.debug("Updating title to '{}'", it)
-            document.title = it
+            existingDocument.title = it
         }
         updateDto.content?.let {
             logger.debug("Updating content length to {}", it.length)
-            document.content = it
+            existingDocument.content = it
         }
 
         try {
-            val updatedDocument = documentRepository.save(document)
-            logger.info("Document with id={} updated successfully to version {}", updatedDocument.id, updatedDocument.version)
+            val updatedDocument = documentRepository.save(existingDocument)
+            logger.info(
+                "Document with id={} updated successfully to version {}",
+                updatedDocument.id,
+                updatedDocument.version
+            )
             return updatedDocument.toResponseDto()
-        } catch (e: OptimisticLockingFailureException) {
-            logger.warn("Optimistic locking failure for document id={}", id)
+        } catch (exception: OptimisticLockingFailureException) {
+            logger.warn("Optimistic locking failure for document id={}, exception={}", id, exception.message)
             throw OptimisticLockingException("Document has been modified by another user. Please refresh and try again.")
         }
     }
@@ -98,13 +104,6 @@ class DocumentService(
         }
         documentRepository.deleteById(id)
         logger.info("Document with id={} deleted", id)
-    }
-
-    fun searchDocuments(title: String): List<DocumentResponseDto> {
-        logger.info("Searching documents with title containing '{}'", title)
-        val results = documentRepository.findByTitleContainingIgnoreCase(title)
-        logger.debug("Found {} documents matching title='{}'", results.size, title)
-        return results.map { it.toResponseDto() }
     }
 
     private fun Document.toResponseDto(): DocumentResponseDto {

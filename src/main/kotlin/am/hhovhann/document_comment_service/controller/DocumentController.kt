@@ -20,56 +20,43 @@ import java.util.*
 @RestController
 @RequestMapping("/api/documents")
 @Tag(name = "Documents", description = "Document management operations")
-class DocumentController(
-    private val documentService: DocumentService
-) {
+class DocumentController(private val documentService: DocumentService) {
     private val logger = LoggerFactory.getLogger(DocumentController::class.java)
 
     @GetMapping
     @Operation(summary = "Get all documents", description = "Retrieve all documents ordered by last updated")
-    @ApiResponses(
-        ApiResponse(responseCode = "200", description = "Successfully retrieved documents")
-    )
-    fun getAllDocuments(
-        @Parameter(description = "Optional title filter")
-        @RequestParam(required = false) title: String?
-    ): ResponseEntity<List<DocumentResponseDto>> {
-        logger.info("GET /api/documents called with title='{}'", title)
-        val documents = if (title != null) {
-            logger.debug("Searching documents with title filter: {}", title)
-            documentService.searchDocuments(title)
-        } else {
-            documentService.getAllDocuments()
-        }
+    @ApiResponses(value = [ApiResponse(responseCode = "200", description = "Successfully retrieved documents")])
+    fun getAllDocuments(): ResponseEntity<List<DocumentResponseDto>> {
+        logger.info("GET /api/documents")
+        val documents = documentService.getAllDocuments()
         logger.info("Returning {} documents", documents.size)
-        return ResponseEntity.ok(documents)
+        return ResponseEntity.status(HttpStatus.OK).body(documents)
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get document by ID", description = "Retrieve a specific document by its ID")
     @ApiResponses(
-        ApiResponse(responseCode = "200", description = "Successfully retrieved document"),
-        ApiResponse(responseCode = "404", description = "Document not found")
+        value = [
+            ApiResponse(responseCode = "200", description = "Successfully retrieved document"),
+            ApiResponse(responseCode = "404", description = "Document not found")
+        ]
     )
-    fun getDocumentById(
-        @Parameter(description = "Document ID")
-        @PathVariable id: UUID
-    ): ResponseEntity<DocumentResponseDto> {
+    fun getDocumentById(@Parameter(description = "Document ID") @PathVariable id: UUID): ResponseEntity<DocumentResponseDto> {
         logger.info("GET /api/documents/{} called", id)
         val document = documentService.getDocumentById(id)
         logger.info("Retrieved document with id={}", id)
-        return ResponseEntity.ok(document)
+        return ResponseEntity.status(HttpStatus.OK).body(document)
     }
 
     @PostMapping
     @Operation(summary = "Create new document", description = "Create a new document")
     @ApiResponses(
-        ApiResponse(responseCode = "201", description = "Document created successfully"),
-        ApiResponse(responseCode = "400", description = "Invalid input data")
+        value = [
+            ApiResponse(responseCode = "201", description = "Document created successfully"),
+            ApiResponse(responseCode = "400", description = "Invalid input data")
+        ]
     )
-    fun createDocument(
-        @Valid @RequestBody createDto: DocumentCreateDto
-    ): ResponseEntity<DocumentResponseDto> {
+    fun createDocument(@Valid @RequestBody createDto: DocumentCreateDto): ResponseEntity<DocumentResponseDto> {
         logger.info("POST /api/documents called to create new document with title='{}'", createDto.title)
         val document = documentService.createDocument(createDto)
         logger.info("Created new document with id={}", document.id)
@@ -84,26 +71,24 @@ class DocumentController(
         ApiResponse(responseCode = "400", description = "Invalid input data")
     )
     fun updateDocument(
-        @Parameter(description = "Document ID")
-        @PathVariable id: UUID,
+        @Parameter(description = "Document ID") @PathVariable id: UUID,
         @Valid @RequestBody updateDto: DocumentUpdateDto
     ): ResponseEntity<DocumentResponseDto> {
         logger.info("PUT /api/documents/{} called to update document", id)
         val document = documentService.updateDocument(id, updateDto)
         logger.info("Updated document with id={}", document.id)
-        return ResponseEntity.ok(document)
+        return ResponseEntity.status(HttpStatus.OK).body(document)
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete document", description = "Delete a document and all its comments")
     @ApiResponses(
-        ApiResponse(responseCode = "204", description = "Document deleted successfully"),
-        ApiResponse(responseCode = "404", description = "Document not found")
+        value = [
+            ApiResponse(responseCode = "204", description = "Document deleted successfully"),
+            ApiResponse(responseCode = "404", description = "Document not found")
+        ]
     )
-    fun deleteDocument(
-        @Parameter(description = "Document ID")
-        @PathVariable id: UUID
-    ): ResponseEntity<Unit> {
+    fun deleteDocument(@Parameter(description = "Document ID") @PathVariable id: UUID): ResponseEntity<Unit> {
         logger.info("DELETE /api/documents/{} called", id)
         documentService.deleteDocument(id)
         logger.info("Deleted document with id={}", id)

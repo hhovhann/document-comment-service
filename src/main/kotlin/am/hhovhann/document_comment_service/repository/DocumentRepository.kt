@@ -9,9 +9,6 @@ import java.util.*
 @Repository
 interface DocumentRepository : JpaRepository<Document, UUID> {
 
-    @Query("SELECT d FROM Document d WHERE LOWER(d.title) LIKE LOWER(CONCAT('%', :title, '%'))")
-    fun findByTitleContainingIgnoreCase(title: String): List<Document>
-
     @Query("SELECT d FROM Document d ORDER BY d.updatedAt DESC")
     fun findAllOrderByUpdatedAtDesc(): List<Document>
 }

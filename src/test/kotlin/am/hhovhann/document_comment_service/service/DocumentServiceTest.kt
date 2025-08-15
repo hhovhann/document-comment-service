@@ -152,22 +152,6 @@ class DocumentServiceTest {
         verify { documentRepository.existsById(documentId) }
     }
 
-    @Test
-    fun `searchDocuments should return filtered results`() {
-        // Given
-        val searchTerm = "test"
-        val documents = listOf(createMockDocument("Test Doc", "Content"))
-        every { documentRepository.findByTitleContainingIgnoreCase(searchTerm) } returns documents
-
-        // When
-        val result = documentService.searchDocuments(searchTerm)
-
-        // Then
-        assertEquals(1, result.size)
-        assertEquals("Test Doc", result[0].title)
-        verify { documentRepository.findByTitleContainingIgnoreCase(searchTerm) }
-    }
-
     private fun createMockDocument(title: String,
                                    content: String): Document {
         return Document(
