@@ -150,39 +150,6 @@ class CommentServiceTest {
         verify { documentRepository.findById(documentId) }
     }
 
-    @Test
-    fun `getCommentsByAuthor should return filtered comments`() {
-        // Given
-        val documentId = UUID.randomUUID()
-        val author = "Test Author"
-        val comments = listOf(createMockComment("Comment 1", author))
-        every { commentRepository.findByDocumentIdAndAuthor(documentId, author) } returns comments
-
-        // When
-        val result = commentService.getCommentsByAuthor(documentId, author)
-
-        // Then
-        assertEquals(1, result.size)
-        assertEquals(author, result[0].author)
-        verify { commentRepository.findByDocumentIdAndAuthor(documentId, author) }
-    }
-
-    @Test
-    fun `getCommentsByParagraph should return filtered comments`() {
-        // Given
-        val documentId = UUID.randomUUID()
-        val paragraphIndex = 0
-        val comments = listOf(createMockComment("Comment 1", "Author 1"))
-        every { commentRepository.findByDocumentIdAndParagraphIndex(documentId, paragraphIndex) } returns comments
-
-        // When
-        val result = commentService.getCommentsByParagraph(documentId, paragraphIndex)
-
-        // Then
-        assertEquals(1, result.size)
-        verify { commentRepository.findByDocumentIdAndParagraphIndex(documentId, paragraphIndex) }
-    }
-
     private fun createMockComment(content: String, author: String): Comment {
         return Comment(
             id = UUID.randomUUID(),

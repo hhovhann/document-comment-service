@@ -126,44 +126,6 @@
           "response": []
         },
         {
-          "name": "Get Comments by Author",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/documents/{{document_id}}/comments?author=John Doe",
-              "host": ["{{base_url}}"],
-              "path": ["api", "documents", "{{document_id}}", "comments"],
-              "query": [
-                {
-                  "key": "author",
-                  "value": "John Doe"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Comments by Paragraph",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/documents/{{document_id}}/comments?paragraphIndex=1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "documents", "{{document_id}}", "comments"],
-              "query": [
-                {
-                  "key": "paragraphIndex",
-                  "value": "1"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Create Comment - Character-Based",
           "request": {
             "method": "POST",

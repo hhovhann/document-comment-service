@@ -64,39 +64,6 @@ class CommentControllerTest {
     }
 
     @Test
-    fun `GET comments with author filter should return filtered results`() {
-        // Given
-        val documentId = UUID.randomUUID()
-        val author = "Test Author"
-        val comments = listOf(createMockCommentResponse("Comment 1", author))
-        every { commentService.getCommentsByAuthor(documentId, author) } returns comments
-
-        // When & Then
-        mockMvc.perform(get("/api/documents/$documentId/comments").param("author", author))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(1))
-            .andExpect(jsonPath("$[0].author").value(author))
-
-        verify { commentService.getCommentsByAuthor(documentId, author) }
-    }
-
-    @Test
-    fun `GET comments with paragraph filter should return filtered results`() {
-        // Given
-        val documentId = UUID.randomUUID()
-        val paragraphIndex = 0
-        val comments = listOf(createMockCommentResponse("Comment 1", "Author 1"))
-        every { commentService.getCommentsByParagraph(documentId, paragraphIndex) } returns comments
-
-        // When & Then
-        mockMvc.perform(get("/api/documents/$documentId/comments").param("paragraphIndex", "0"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(1))
-
-        verify { commentService.getCommentsByParagraph(documentId, paragraphIndex) }
-    }
-
-    @Test
     fun `GET comments should return 404 when document not found`() {
         // Given
         val documentId = UUID.randomUUID()

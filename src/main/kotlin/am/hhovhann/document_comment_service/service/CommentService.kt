@@ -59,24 +59,6 @@ class CommentService(
         return savedComment.toResponseDto()
     }
 
-    fun getCommentsByAuthor(documentId: UUID, author: String): List<CommentResponseDto> {
-        logger.info("Fetching comments by author='{}' for documentId={}", author, documentId)
-
-        val comments = commentRepository.findByDocumentIdAndAuthor(documentId, author)
-        logger.debug("Found {} comments by author='{}'", comments.size, author)
-
-        return comments.map { it.toResponseDto() }
-    }
-
-    fun getCommentsByParagraph(documentId: UUID, paragraphIndex: Int): List<CommentResponseDto> {
-        logger.info("Fetching comments for paragraphIndex={} in documentId={}", paragraphIndex, documentId)
-
-        val comments = commentRepository.findByDocumentIdAndParagraphIndex(documentId, paragraphIndex)
-        logger.debug("Found {} comments in paragraph {}", comments.size, paragraphIndex)
-
-        return comments.map { it.toResponseDto() }
-    }
-
     private fun validateCommentLocation(locationDto: CommentLocationDto, documentContent: String) {
         logger.debug("Validating comment location: {}", locationDto)
 

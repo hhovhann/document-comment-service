@@ -6,7 +6,7 @@ A complete Spring Boot backend system that allows users to create documents and 
 - **Language**: Kotlin 1.9.25
 - **Framework**: Spring Boot 3.5.4
 - **ORM**: Hibernate / JPA
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL 15
 - **Database Migration**: Flyway
 - **API Docs**: Swagger
 - **Build Tool**: Gradle
@@ -20,6 +20,9 @@ design/
 docker/
 ├── Dockerfile
 ├── docker-compose.yml
+docs/
+├── FLYWAY_MIGRATIONS.md
+├── HELP.md
 kubernates/
 ├── deployment.yaml
 ├── service.yaml
@@ -46,6 +49,15 @@ src/main/kotlin/am/hhovhann/document_comment_service/
 └── exception/
     ├── Exceptions.kt
     └── GlobalExceptionHandler.kt
+src/test/kotlin/am/hhovhann/document_comment_service/
+├── DocumentCommentServiceApplicationTest.kt
+├── controller/
+│   ├── CommentControllerTest.kt
+│   └── DocumentControllerTest.kt
+├── service/
+│   ├── CommentServiceTest.kt
+│   └── DocumentConcurrencyTest.kt
+│   └── DocumentServiceTest.kt
 ```
 
 ## 🚀 Setup Instructions
@@ -244,21 +256,21 @@ curl -X POST http://localhost:8080/api/documents/{document-id}/comments \
 curl -X GET http://localhost:8080/api/documents/{document-id}/comments
 ```
 
-### Get Comments with Filters
-```bash
-# Filter by author
-curl -X GET http://localhost:8080/api/documents/{document-id}/comments?author=John%20Doe
-
-# Filter by paragraph
-curl -X GET http://localhost:8080/api/documents/{document-id}/comments?paragraphIndex=1
-```
-
 ## 🧪 Postman API Testing
 - Use the json file and import in postman to test the endpoints [document-commenting.postman_collection.json](postman/document-commenting.postman_collection.json)
 
 ### Nice to Have
-- ✅ Database migration support (Added Flyway)
-- ✅ Containerize support (Added Docker support for Database)
-- Tests (load/stress, penetration, integration: testcontainers)
-- Made the system more scalable and re design when expected high load
-
+- ✅ Database migration support — Added Flyway for versioned schema migrations.
+- ✅ Containerization support — Added Docker for database setup and environment parity.
+- Document storage improvements
+  - Store documents in object storage (e.g., S3, MinIO)
+  - Store document metadata and object storage link in the database
+- Real-time collaboration backend
+  - Replace or supplement REST with WebSockets
+  - Implement Operational Transform (OT) or Conflict-free Replicated Data Types (CRDT) for concurrency-safe edits
+- Scalability
+  - Architect for high load, multi-document concurrency, and horizontal scaling 
+- Testing strategy
+  - Load & stress tests
+  - Penetration tests
+  - Integration tests using Testcontainers
