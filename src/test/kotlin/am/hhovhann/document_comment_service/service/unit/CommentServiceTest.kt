@@ -1,4 +1,4 @@
-package am.hhovhann.document_comment_service.service
+package am.hhovhann.document_comment_service.service.unit
 
 import am.hhovhann.document_comment_service.dto.CommentCreateDto
 import am.hhovhann.document_comment_service.dto.CommentLocationDto
@@ -9,6 +9,7 @@ import am.hhovhann.document_comment_service.exception.DocumentNotFoundException
 import am.hhovhann.document_comment_service.exception.InvalidCommentLocationException
 import am.hhovhann.document_comment_service.repository.CommentRepository
 import am.hhovhann.document_comment_service.repository.DocumentRepository
+import am.hhovhann.document_comment_service.service.CommentService
 import io.mockk.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach

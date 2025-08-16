@@ -6,7 +6,7 @@ A complete Spring Boot backend system that allows users to create documents and 
 - **Language**: Kotlin 1.9.25
 - **Framework**: Spring Boot 3.5.4
 - **ORM**: Hibernate / JPA
-- **Database**: PostgreSQL 15
+- **Database**: PostgresSQL 15
 - **Database Migration**: Flyway
 - **API Docs**: Swagger
 - **Build Tool**: Gradle
@@ -256,8 +256,34 @@ curl -X POST http://localhost:8080/api/documents/{document-id}/comments \
 curl -X GET http://localhost:8080/api/documents/{document-id}/comments
 ```
 
+## 🧪 Testing
+
+The project has two types of tests: **unit tests** (fast, mocked) and **integration tests** (real DB).  
+Both are important to cover business logic and persistence behavior.
+
+---
+
+### ✅ Unit Tests
+- Use **mocked repositories** (no database needed).
+- Provide fast feedback for service logic and edge cases.
+
+---
+
+### 🔗 Integration Tests
+- Run against a **real PostgreSQL database**.
+- Validate persistence, optimistic locking, and concurrency behavior.
+- Require **Docker** to be running with the test database defined in `docker-compose.yml`.
+- The application automatically connects using `application-test.properties`.
+
+Start the database with:
+
+```bash
+cd docker
+docker-compose up --build -d
+```
+
 ## 🧪 Postman API Testing
-- Use the json file and import in postman to test the endpoints [document-commenting.postman_collection.json](postman/document-commenting.postman_collection.json)
+- Use the JSON file and import in POSTMAN to test the endpoints [document-commenting.postman_collection.json](postman/document-commenting.postman_collection.json)
 
 ### Nice to Have
 - ✅ Database migration support — Added Flyway for versioned schema migrations.
@@ -266,11 +292,10 @@ curl -X GET http://localhost:8080/api/documents/{document-id}/comments
   - Store documents in object storage (e.g., S3, MinIO)
   - Store document metadata and object storage link in the database
 - Real-time collaboration backend
-  - Replace or supplement REST with WebSockets
+  - Replace or supplement the REST with WebSockets
   - Implement Operational Transform (OT) or Conflict-free Replicated Data Types (CRDT) for concurrency-safe edits
 - Scalability
   - Architect for high load, multi-document concurrency, and horizontal scaling 
 - Testing strategy
   - Load & stress tests
   - Penetration tests
-  - Integration tests using Testcontainers

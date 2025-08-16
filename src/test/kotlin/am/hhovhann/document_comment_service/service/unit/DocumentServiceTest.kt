@@ -1,10 +1,12 @@
-package am.hhovhann.document_comment_service.service
+package am.hhovhann.document_comment_service.service.unit
 
 import am.hhovhann.document_comment_service.dto.DocumentCreateDto
 import am.hhovhann.document_comment_service.dto.DocumentUpdateDto
 import am.hhovhann.document_comment_service.entity.Document
 import am.hhovhann.document_comment_service.exception.DocumentNotFoundException
+import am.hhovhann.document_comment_service.exception.OptimisticLockingException
 import am.hhovhann.document_comment_service.repository.DocumentRepository
+import am.hhovhann.document_comment_service.service.DocumentService
 import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -108,6 +110,21 @@ class DocumentServiceTest {
         assertEquals("Updated Content", result.content)
         verify { documentRepository.findById(documentId) }
         verify { documentRepository.save(any<Document>()) }
+    }
+
+    @Test
+    fun `updateDocument should throw OptimisticLockingException when version mismatch`() {
+        val documentId = UUID.randomUUID()
+        val existingDocument = createMockDocument("Old Title", "Old Content").apply {
+            version = 2
+        }
+        val updateDto = DocumentUpdateDto(title = "Old Title Updated", "Old Content Updated", version = 1) // stale version
+
+        every { documentRepository.findById(documentId) } returns Optional.of(existingDocument)
+
+        assertThrows<OptimisticLockingException> {
+            documentService.updateDocument(documentId, updateDto)
+        }
     }
 
     @Test
