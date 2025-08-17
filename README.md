@@ -39,11 +39,19 @@ src/main/kotlin/am/hhovhann/document_comment_service/
 ├── entity/
 │   ├── Document.kt
 │   ├── Comment.kt
-│   └── CommentLocation.kt
+│   └── DocumentBlock.kt
 ├── repository/
 │   ├── DocumentRepository.kt
 │   └── CommentRepository.kt
 ├── dto/
+    ├── location/
+    │   ├── AnchorLocation.kt
+    │   ├── BlockIdLocation.kt
+    │   ├── CharRangeLocation.kt
+    │   ├── CommentLocationStrategy.kt
+    │   ├── CompositeLocation.kt
+    │   └── LineLocation.kt
+    │   └── ParagraphLocation.kt
 │   ├── DocumentDto.kt
 │   └── CommentDto.kt
 └── exception/
@@ -55,9 +63,12 @@ src/test/kotlin/am/hhovhann/document_comment_service/
 │   ├── CommentControllerTest.kt
 │   └── DocumentControllerTest.kt
 ├── service/
-│   ├── CommentServiceTest.kt
-│   └── DocumentConcurrencyTest.kt
-│   └── DocumentServiceTest.kt
+    ├── integration/
+    │   ├── CommentServiceIntegrationTest.kt
+    │   ├── DocumentServiceIntegrationTest.kt
+    ├── unit/
+    │   ├── CommentServiceTest.kt
+    │   ├── DocumentServiceTest.kt
 ```
 
 ## 🚀 Setup Instructions
@@ -111,7 +122,7 @@ Once running, access Swagger UI at: `http://localhost:8080/swagger-ui.html`
 ## 📍 Comment-to-Document Location Mapping
 
 ### Design Decision
-I chose a **flexible multi-strategy approach** using an embedded `CommentLocation` entity that supports multiple location reference types. This allows comments to be anchored to specific places in documents using different strategies based on use case.
+I chose a **flexible multi-strategy approach** using a `CommentLocationStrategy` interface that supports multiple strategies reference types. This allows comments to be anchored to specific places in documents using different strategies based on use case.
 
 ### Location Strategies
 
@@ -190,7 +201,7 @@ Instead of calculating positions (chars/lines), we reference the logical block i
   - Ensure blockId is non-blank. 
   - Optionally, check that the document actually contains a block with that ID (depends if you have a block model in DB).
 
-### Combining Strategies
+### Composite Strategies
 You can combine multiple location strategies for more robust positioning:
 ```json
 {
@@ -215,7 +226,7 @@ You can combine multiple location strategies for more robust positioning:
 2. **Robustness**: Multiple strategies provide fallback options
 3. **Precision**: Can be as precise or as general as needed
 4. **Extensible**: Easy to add new location strategies
-5. **Validation**: Built-in validation ensures location references are valid
+5. **Validation**: Built-in validation in strategies ensures location references are valid
 
 
 ## 📦 API Endpoints
@@ -252,6 +263,7 @@ curl -X POST http://localhost:8080/api/documents/{document-id}/comments \
     "content": "This section needs clarification",
     "author": "John Doe",
     "location": {
+      "type": "charRange",
       "startChar": 50,
       "endChar": 100
     }
@@ -266,6 +278,7 @@ curl -X POST http://localhost:8080/api/documents/{document-id}/comments \
     "content": "Great point in this paragraph!",
     "author": "Jane Smith",
     "location": {
+      "type": "paragraph",
       "paragraphIndex": 1
     }
   }'
@@ -279,6 +292,7 @@ curl -X POST http://localhost:8080/api/documents/{document-id}/comments \
     "content": "This phrase is key to understanding",
     "author": "Bob Wilson",
     "location": {
+      "type": "anchor",
       "anchorText": "important information"
     }
   }'
