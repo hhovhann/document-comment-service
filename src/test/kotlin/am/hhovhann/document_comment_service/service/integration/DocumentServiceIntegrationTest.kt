@@ -2,6 +2,7 @@ package am.hhovhann.document_comment_service.service.integration
 
 import am.hhovhann.document_comment_service.dto.DocumentCreateDto
 import am.hhovhann.document_comment_service.dto.DocumentUpdateDto
+import am.hhovhann.document_comment_service.entity.DocumentBlock
 import am.hhovhann.document_comment_service.exception.OptimisticLockingException
 import am.hhovhann.document_comment_service.repository.DocumentRepository
 import am.hhovhann.document_comment_service.service.DocumentService
@@ -80,5 +81,66 @@ class DocumentServiceIntegrationTest @Autowired constructor(
         assertEquals("Third", fresh3.title)
         assertEquals("Second", fresh3.content)
         assertTrue(fresh3.version > doc.version)
+    }
+
+    /**
+     * Test case to verify the full lifecycle of a document that includes content blocks.
+     * This test covers:
+     * 1. Creating a document with blocks.
+     * 2. Fetching the document and verifying the blocks are present.
+     * 3. Updating the document with a new set of blocks.
+     * 4. Fetching the updated document and verifying the new blocks are saved.
+     * 5. Deleting the document.
+     */
+    @Test
+    fun `create, fetch, delete and update document with blocks`() {
+        // --- 1. Create a document with blocks ---
+        val createDto = DocumentCreateDto(
+            title = "My Sample Document with blocks",
+            content = "This is the first paragraph...",
+            blocks = listOf(
+                DocumentBlock("para-1", "paragraph", "Paragraph 1."),
+                DocumentBlock("para-2", "paragraph", "Paragraph 2 with some data."),
+                DocumentBlock("fig-3a", "figure", "Diagram showing architecture.")
+            )
+        )
+        val created = documentService.createDocument(createDto)
+        assertNotNull(created.id)
+        assertNotNull(created.blocks)
+        assertEquals(3, created.blocks.size)
+        assertEquals("para-1", created.blocks.get(0).id)
+        assertEquals("Paragraph 1.", created.blocks.get(0)?.content)
+
+        // --- 2. Fetch the document and verify blocks ---
+        val fetchedAfterCreate = documentService.getDocumentById(created.id)
+        assertEquals("My Sample Document with blocks", fetchedAfterCreate.title)
+        assertEquals("This is the first paragraph...", fetchedAfterCreate.content)
+        assertNotNull(fetchedAfterCreate.blocks)
+        assertEquals(3, fetchedAfterCreate.blocks?.size)
+        assertEquals("fig-3a", fetchedAfterCreate.blocks?.get(2)?.id)
+
+        // --- 3. Update the document with new blocks ---
+        val updateDto = DocumentUpdateDto(
+            title = "Updated Document Title",
+            content = "This is the updated content...",
+            blocks = listOf(
+                DocumentBlock("fig-3a", "figure", "Diagram showing architecture.")
+            ),
+            version = fetchedAfterCreate.version
+        )
+        val updated = documentService.updateDocument(created.id, updateDto)
+
+        // --- 4. Assert the update was successful and blocks were replaced ---
+        assertEquals("Updated Document Title", updated.title)
+        assertEquals("This is the updated content...", updated.content)
+        assertNotNull(updated.blocks)
+        assertEquals(1, updated.blocks.size)
+        assertEquals("fig-3a", updated.blocks.get(0).id)
+        assertEquals("Diagram showing architecture.", updated.blocks.get(0).content)
+        assertTrue(updated.version == fetchedAfterCreate.version)
+
+        // --- 5. Delete the document and verify it's gone ---
+        documentService.deleteDocument(created.id)
+        assertFalse(documentRepository.findById(created.id).isPresent)
     }
 }

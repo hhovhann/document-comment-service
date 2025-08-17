@@ -1,5 +1,6 @@
 package am.hhovhann.document_comment_service.dto
 
+import am.hhovhann.document_comment_service.dto.location.CommentLocationStrategy
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
@@ -11,7 +12,7 @@ data class CommentResponseDto(
     val id: UUID,
     val content: String,
     val author: String,
-    val location: CommentLocationDto,
+    val location: CommentLocationStrategy,
     val createdAt: LocalDateTime,
     val documentId: UUID
 )
@@ -25,7 +26,7 @@ data class CommentCreateDto(
     val author: String,
 
     @field:Valid
-    val location: CommentLocationDto
+    val location: CommentLocationStrategy
 )
 
 data class CommentLocationDto(

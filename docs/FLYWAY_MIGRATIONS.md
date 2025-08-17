@@ -13,7 +13,6 @@ Flyway is used to manage database schema changes in a version-controlled manner.
 Migration files follow the naming pattern: `V{version}__{description}.sql`
 
 - `V1__Create_initial_schema.sql` - Creates the base schema
-- `V2__Add_optimistic_locking_indexes.sql` - Adds performance indexes
 
 ### Migration Locations
 
@@ -27,13 +26,9 @@ Creates the initial database schema:
 - `documents` table with optimistic locking support
 - `comments` table with location tracking
 - Basic indexes for performance
-- PostgreSQL trigger for automatic `updated_at` updates
-
-### V2__Add_optimistic_locking_indexes.sql
-Adds performance optimization indexes:
-- Version index for optimistic locking queries
-- Composite indexes for document search
+- - Version index for optimistic locking queries
 - Location-based indexes for comments
+- PostgreSQL trigger for automatic `updated_at` updates
 
 ## Configuration
 
@@ -86,7 +81,7 @@ flyway -url=jdbc:postgresql://localhost:5432/document_comments \
 ### Example Migration
 
 ```sql
--- V3__Add_user_audit_columns.sql
+-- V2__Add_user_audit_columns.sql
 ALTER TABLE documents ADD COLUMN created_by VARCHAR(100);
 ALTER TABLE documents ADD COLUMN updated_by VARCHAR(100);
 CREATE INDEX idx_documents_created_by ON documents(created_by);

@@ -118,6 +118,7 @@ I chose a **flexible multi-strategy approach** using an embedded `CommentLocatio
 #### 1. **Character-Based Positioning** (Most Precise)
 ```json
 {
+  "type": "charRange",
   "startChar": 150,
   "endChar": 200
 }
@@ -130,6 +131,7 @@ I chose a **flexible multi-strategy approach** using an embedded `CommentLocatio
 #### 2. **Paragraph-Based Positioning** (Structural)
 ```json
 {
+  "type": "paragraph",
   "paragraphIndex": 2
 }
 ```
@@ -141,6 +143,7 @@ I chose a **flexible multi-strategy approach** using an embedded `CommentLocatio
 #### 3. **Anchor Text** (Context-Aware)
 ```json
 {
+  "type": "anchor",
   "anchorText": "This is the important sentence"
 }
 ```
@@ -152,6 +155,7 @@ I chose a **flexible multi-strategy approach** using an embedded `CommentLocatio
 #### 4. **Line Number** (Code/Structured Documents)
 ```json
 {
+  "type": "line",
   "lineNumber": 42
 }
 ```
@@ -159,10 +163,38 @@ I chose a **flexible multi-strategy approach** using an embedded `CommentLocatio
 - **How it works**: References specific line numbers
 - **Best for**: Code reviews, structured content
 
+
+#### 5. **Block ID** (Code/Structured Documents) TODO New Strategy BlockIdLocation, NOT SUPPORTED IN THIS VERSION
+```json
+{
+  "type": "block",
+  "blockId": "fig-3a"
+}
+```
+- **Use Case**: When documents are not just plain text but contain structured blocks such as:
+  - Figures (fig-3a)
+  - Tables (tbl-2)
+  - Footnotes or citations (note-12)
+  - Headings / sections (sec-intro)
+  - Embedded media blocks (images, diagrams)
+Instead of calculating positions (chars/lines), we reference the logical block in the document model.
+- **How it works**: 
+  - The document parsing/authoring system assigns stable IDs to blocks.
+  - A comment references the block by blockId.
+  - The UI can highlight or anchor the comment directly to that block, no matter if text around it changes.
+- **Best for**:
+  - Rich documents (scientific papers, legal contracts, technical docs)
+  - Code+Docs hybrids (Jupyter notebooks, Markdown with figures)
+  - CMS/Editor use cases (where blocks are first-class objects)
+- **Validation**:
+  - Ensure blockId is non-blank. 
+  - Optionally, check that the document actually contains a block with that ID (depends if you have a block model in DB).
+
 ### Combining Strategies
 You can combine multiple location strategies for more robust positioning:
 ```json
 {
+  "type": "composite",
   "startChar": 150,
   "endChar": 200,
   "paragraphIndex": 2,
@@ -176,6 +208,7 @@ You can combine multiple location strategies for more robust positioning:
 - Paragraph indices must exist in the document
 - Anchor text must be found in the document
 - Start character must be ≤ end character
+- Block ID must be found in the document blocks
 
 ### Why This Approach?
 1. **Flexibility**: Supports different types of documents (prose, code, structured)

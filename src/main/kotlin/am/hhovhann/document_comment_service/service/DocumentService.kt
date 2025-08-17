@@ -40,7 +40,7 @@ class DocumentService(private val documentRepository: DocumentRepository) {
 
     fun createDocument(createDto: DocumentCreateDto): DocumentResponseDto {
         logger.info("Creating new document with title='{}'", createDto.title)
-        val documentToSave = Document(title = createDto.title, content = createDto.content)
+        val documentToSave = Document(title = createDto.title, content = createDto.content, blocks = createDto.blocks)
         val savedDocument = documentRepository.save(documentToSave)
         logger.info("Document created with id={}", savedDocument.id)
 
@@ -81,6 +81,10 @@ class DocumentService(private val documentRepository: DocumentRepository) {
             logger.debug("Updating content length to {}", it.length)
             existingDocument.content = it
         }
+        updateDto.blocks.let {
+            logger.debug("Updating blocks size to {}", it.size)
+            existingDocument.blocks = it
+        }
 
         try {
             val updatedDocument = documentRepository.save(existingDocument)
@@ -111,6 +115,7 @@ class DocumentService(private val documentRepository: DocumentRepository) {
             id = this.id!!,
             title = this.title,
             content = this.content,
+            blocks = this.blocks,
             createdAt = this.createdAt,
             updatedAt = this.updatedAt,
             commentCount = this.comments.size,

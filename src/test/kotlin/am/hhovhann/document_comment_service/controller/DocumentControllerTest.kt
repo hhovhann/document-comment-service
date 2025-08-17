@@ -1,5 +1,6 @@
 package am.hhovhann.document_comment_service.controller
 
+import am.hhovhann.document_comment_service.entity.DocumentBlock
 import am.hhovhann.document_comment_service.dto.DocumentCreateDto
 import am.hhovhann.document_comment_service.dto.DocumentResponseDto
 import am.hhovhann.document_comment_service.dto.DocumentUpdateDto
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.List
 
 @WebMvcTest(DocumentController::class)
 class DocumentControllerTest {
@@ -44,9 +46,14 @@ class DocumentControllerTest {
     @Test
     fun `GET all documents should return 200 with documents list`() {
         // Given
+        val blocks = listOf(
+            DocumentBlock("para-1","paragraph","Paragraph 1."),
+            DocumentBlock("para-2","paragraph","Paragraph 2 with some data."),
+            DocumentBlock("fig-3a","figure","Diagram showing architecture.")
+        )
         val documents = listOf(
-            createMockDocumentResponse("Doc 1", "Content 1"),
-            createMockDocumentResponse("Doc 2", "Content 2")
+            createMockDocumentResponse("Doc 1", "Content 1", blocks),
+            createMockDocumentResponse("Doc 2", "Content 2", blocks)
         )
         every { documentService.getAllDocuments() } returns documents
 
@@ -57,7 +64,15 @@ class DocumentControllerTest {
             .andExpect(jsonPath("$").isArray)
             .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$[0].title").value("Doc 1"))
+            .andExpect(jsonPath("$[0].content").value("Content 1"))
+            .andExpect(jsonPath("$[0].blocks[0].id").value("para-1"))
+            .andExpect(jsonPath("$[0].blocks[0].type").value("paragraph"))
+            .andExpect(jsonPath("$[0].blocks[0].content").value("Paragraph 1."))
             .andExpect(jsonPath("$[1].title").value("Doc 2"))
+            .andExpect(jsonPath("$[1].content").value("Content 2"))
+            .andExpect(jsonPath("$[1].blocks[1].id").value("para-2"))
+            .andExpect(jsonPath("$[1].blocks[1].type").value("paragraph"))
+            .andExpect(jsonPath("$[1].blocks[1].content").value("Paragraph 2 with some data."))
 
         verify { documentService.getAllDocuments() }
     }
@@ -66,7 +81,12 @@ class DocumentControllerTest {
     fun `GET document by ID should return 200 when document exists`() {
         // Given
         val documentId = UUID.randomUUID()
-        val document = createMockDocumentResponse("Test Doc", "Test Content")
+        val blocks = listOf(
+            DocumentBlock("para-1","paragraph","Paragraph 1."),
+            DocumentBlock("para-2","paragraph","Paragraph 2 with some data."),
+            DocumentBlock("fig-3a","figure","Diagram showing architecture.")
+        )
+        val document = createMockDocumentResponse("Test Doc", "Test Content", blocks)
         every { documentService.getDocumentById(documentId) } returns document
 
         // When & Then
@@ -74,6 +94,9 @@ class DocumentControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.title").value("Test Doc"))
             .andExpect(jsonPath("$.content").value("Test Content"))
+            .andExpect(jsonPath("$.blocks[0].id").value("para-1"))
+            .andExpect(jsonPath("$.blocks[0].type").value("paragraph"))
+            .andExpect(jsonPath("$.blocks[0].content").value("Paragraph 1."))
 
         verify { documentService.getDocumentById(documentId) }
     }
@@ -94,8 +117,13 @@ class DocumentControllerTest {
     @Test
     fun `POST create document should return 201 with created document`() {
         // Given
-        val createDto = DocumentCreateDto(title = "New Doc", content = "New Content")
-        val createdDocument = createMockDocumentResponse("New Doc", "New Content")
+        val blocks = listOf(
+            DocumentBlock("para-1","paragraph","Paragraph 1."),
+            DocumentBlock("para-2","paragraph","Paragraph 2 with some data."),
+            DocumentBlock("fig-3a","figure","Diagram showing architecture.")
+        )
+        val createDto = DocumentCreateDto(title = "New Doc", content = "New Content", blocks)
+        val createdDocument = createMockDocumentResponse("New Doc", "New Content", blocks)
         every { documentService.createDocument(createDto) } returns createdDocument
 
         // When & Then
@@ -107,6 +135,7 @@ class DocumentControllerTest {
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.title").value("New Doc"))
             .andExpect(jsonPath("$.content").value("New Content"))
+            .andExpect(jsonPath("$.blocks[0].id").value("para-1"))
 
         verify { documentService.createDocument(createDto) }
     }
@@ -115,8 +144,13 @@ class DocumentControllerTest {
     fun `PUT update document should return 200 with updated document`() {
         // Given
         val documentId = UUID.randomUUID()
-        val updateDto = DocumentUpdateDto(title = "Updated Doc", content = "Updated Content", version = 1)
-        val updatedDocument = createMockDocumentResponse("Updated Doc", "Content")
+        val blocks = listOf(
+            DocumentBlock("para-1","paragraph","Paragraph 1 Updated."),
+            DocumentBlock("para-2","paragraph","Paragraph 2 with some data."),
+            DocumentBlock("fig-3a","figure","Diagram showing architecture.")
+        )
+        val updateDto = DocumentUpdateDto(title = "Updated Doc", content = "Updated Content", version = 1, blocks)
+        val updatedDocument = createMockDocumentResponse("Updated Doc", "Content", blocks)
         every { documentService.updateDocument(documentId, updateDto) } returns updatedDocument
 
         // When & Then
@@ -127,6 +161,7 @@ class DocumentControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.title").value("Updated Doc"))
+            .andExpect(jsonPath("$.blocks[0].content").value("Paragraph 1 Updated."))
 
         verify { documentService.updateDocument(documentId, updateDto) }
     }
@@ -144,11 +179,12 @@ class DocumentControllerTest {
         verify { documentService.deleteDocument(documentId) }
     }
 
-    private fun createMockDocumentResponse(title: String, content: String): DocumentResponseDto {
+    private fun createMockDocumentResponse(title: String, content: String, blocks: List<DocumentBlock>): DocumentResponseDto {
         return DocumentResponseDto(
             id = UUID.randomUUID(),
             title = title,
             content = content,
+            blocks = blocks,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now(),
             commentCount = 0,

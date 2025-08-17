@@ -36,7 +36,7 @@
           "response": []
         },
         {
-          "name": "Create Document",
+          "name": "Create Document without blocks",
           "event": [
             {
               "listen": "test",
@@ -73,6 +73,44 @@
           "response": []
         },
         {
+          "name": "Create Document with blocks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.collectionVariables.set('document_id', responseJson.id);",
+                  "    console.log('Document ID saved:', responseJson.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Sample Document with blocks\",\n  \"content\": \"This is the first paragraph of my document. It contains some introductory text that explains what this document is about.\\n\\nThis is the second paragraph with more detailed information. This paragraph contains important data that might need comments and feedback from reviewers.\\n\\nThis is the third paragraph that concludes the document. It provides a summary and final thoughts on the topic discussed above.\",\n  \"blocks\": [\n    {\n      \"id\": \"para-1\",\n      \"type\": \"paragraph\",\n      \"content\": \"Paragraph 1.\"\n    },\n    {\n      \"id\": \"para-2\",\n      \"type\": \"paragraph\",\n      \"content\": \"Paragraph 2 with some data.\"\n    },\n    {\n      \"id\": \"fig-3a\",\n      \"type\": \"figure\",\n      \"content\": \"Diagram showing architecture.\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/documents",
+              "host": ["{{base_url}}"],
+              "path": ["api", "documents"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Update Document",
           "request": {
             "method": "PUT",
@@ -85,6 +123,28 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Updated Document Title\",\n  \"content\": \"This is the updated content of the document. The first paragraph has been revised.\\n\\nThis is the updated second paragraph with new information and improved clarity.\\n\\nThis is the updated third paragraph with additional conclusions.\",\n \"version\": {{concurrency_document_version}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/documents/{{document_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "documents", "{{document_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Document with blocks",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Document Title\",\n  \"content\": \"This is the updated content of the document. The first paragraph has been revised.\\n\\nThis is the updated second paragraph with new information and improved clarity.\\n\\nThis is the updated third paragraph with additional conclusions.\",\n  \"blocks\": [\n    {\n      \"id\": \"fig-3a\",\n      \"type\": \"figure\",\n      \"content\": \"Diagram showing architecture.\"\n    }\n  ],\n  \"version\": {{concurrency_document_version}}\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents/{{document_id}}",
@@ -159,7 +219,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"Great point in this paragraph! This provides excellent context for the overall discussion.\",\n  \"author\": \"Jane Smith\",\n  \"location\": {\n    \"paragraphIndex\": 1\n  }\n}"
+              "raw": "{\n  \"content\": \"Great point in this paragraph! This provides excellent context for the overall discussion.\",\n  \"author\": \"Jane Smith\",\n  \"location\": {\n    \"type\": \"paragraph\",\n    \"paragraphIndex\": 1\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents/{{document_id}}/comments",
@@ -181,7 +241,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"This phrase is key to understanding the main concept. Consider highlighting it more prominently.\",\n  \"author\": \"Bob Wilson\",\n  \"location\": {\n    \"anchorText\": \"important data\"\n  }\n}"
+              "raw": "{\n  \"content\": \"This phrase is key to understanding the main concept. Consider highlighting it more prominently.\",\n  \"author\": \"Bob Wilson\",\n  \"location\": {\n    \"type\": \"anchor\",\n    \"anchorText\": \"important data\"\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents/{{document_id}}/comments",
@@ -214,6 +274,28 @@
           "response": []
         },
         {
+          "name": "Create Comment - Block ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This line could be refactored for better readability.\",\n  \"author\": \"Alice Johnson\",\n  \"location\": {\n    \"type\": \"block\",\n    \"blockId\": \"fig-3a\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/documents/{{document_id}}/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "documents", "{{document_id}}", "comments"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Create Comment - Multiple Location Strategies",
           "request": {
             "method": "POST",
@@ -225,7 +307,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"This section combines multiple location strategies for robust positioning.\",\n  \"author\": \"Charlie Brown\",\n  \"location\": {\n    \"startChar\": 150,\n    \"endChar\": 200,\n    \"paragraphIndex\": 2,\n    \"anchorText\": \"summary\"\n  }\n}"
+              "raw": "{\n  \"content\": \"This section combines multiple location strategies for robust positioning.\",\n  \"author\": \"Charlie Brown\",\n  \"location\": {\n    \"type\": \"composite\",\n    \"startChar\": 150,\n    \"endChar\": 200,\n    \"paragraphIndex\": 2,\n    \"anchorText\": \"summary\"\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents/{{document_id}}/comments",
@@ -287,7 +369,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"This comment has an invalid location\",\n  \"author\": \"Test User\",\n  \"location\": {\n    \"paragraphIndex\": 999\n  }\n}"
+              "raw": "{\n  \"content\": \"This comment has an invalid location\",\n  \"author\": \"Test User\",\n  \"location\": {\n    \"type\": \"paragraph\",\n    \"paragraphIndex\": 999\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents/{{document_id}}/comments",
@@ -309,7 +391,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"This comment has invalid character range\",\n  \"author\": \"Test User\",\n  \"location\": {\n    \"startChar\": 9999,\n    \"endChar\": 10000\n  }\n}"
+              "raw": "{\n  \"content\": \"This comment has invalid character range\",\n  \"author\": \"Test User\",\n  \"location\": {\n    \"type\": \"charRange\",\n    \"startChar\": 9999,\n    \"endChar\": 10000\n  }\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents/{{document_id}}/comments",
@@ -359,7 +441,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Concurrency Test Document\",\n  \"content\": \"This document will be used to test concurrent updates.\"\n}"
+              "raw": "{\n  \"title\": \"Concurrency Test Document\",\n  \"content\": \"This document will be used to test concurrent updates.\",\n  \"blocks\": []\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/documents",

@@ -4,7 +4,9 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.UpdateTimestamp
+import org.hibernate.type.SqlTypes
 import java.time.LocalDateTime
 import java.util.*
 
@@ -27,6 +29,10 @@ data class Document(
     @field:NotBlank(message = "Content cannot be blank")
     @Column(columnDefinition = "TEXT", nullable = false)
     var content: String,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", nullable = false)
+    var blocks: List<DocumentBlock> = emptyList(),
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

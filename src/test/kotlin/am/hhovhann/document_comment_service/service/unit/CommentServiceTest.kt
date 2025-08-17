@@ -1,18 +1,24 @@
 package am.hhovhann.document_comment_service.service.unit
 
 import am.hhovhann.document_comment_service.dto.CommentCreateDto
-import am.hhovhann.document_comment_service.dto.CommentLocationDto
+import am.hhovhann.document_comment_service.dto.location.AnchorLocation
+import am.hhovhann.document_comment_service.dto.location.BlockIdLocation
+import am.hhovhann.document_comment_service.dto.location.CharRangeLocation
+import am.hhovhann.document_comment_service.dto.location.CompositeLocation
 import am.hhovhann.document_comment_service.entity.Comment
-import am.hhovhann.document_comment_service.entity.CommentLocation
 import am.hhovhann.document_comment_service.entity.Document
+import am.hhovhann.document_comment_service.entity.DocumentBlock
 import am.hhovhann.document_comment_service.exception.DocumentNotFoundException
 import am.hhovhann.document_comment_service.exception.InvalidCommentLocationException
 import am.hhovhann.document_comment_service.repository.CommentRepository
 import am.hhovhann.document_comment_service.repository.DocumentRepository
 import am.hhovhann.document_comment_service.service.CommentService
-import io.mockk.*
-import org.junit.jupiter.api.Test
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDateTime
@@ -70,8 +76,8 @@ class CommentServiceTest {
     fun `createComment should create comment with valid location`() {
         // Given
         val documentId = UUID.randomUUID()
-        val document = createMockDocument("Test Doc", "This is a test document content")
-        val locationDto = CommentLocationDto(startChar = 0, endChar = 4, paragraphIndex = 0)
+        val document = createMockDocument("Test Doc", "This is a test document content", listOf())
+        val locationDto = CompositeLocation(startChar = 0, endChar = 4, paragraphIndex = 0, "content")
         val createDto = CommentCreateDto(
             content = "Test comment",
             author = "Test Author",
@@ -93,10 +99,45 @@ class CommentServiceTest {
     }
 
     @Test
+    fun `createComment should create comment with block-based location`() {
+        // Given
+        val documentId = UUID.randomUUID()
+        val document = createMockDocument(
+            "Test Doc",
+            "Content",
+            listOf(DocumentBlock("fig-3a", "figure", "Diagram showing architecture."))
+        )
+        val locationDto = BlockIdLocation(blockId = "fig-3a")
+        val createDto = CommentCreateDto(
+            content = "Comment on block",
+            author = "Block Author",
+            location = locationDto
+        )
+        val savedComment = createMockCommentWithBlockLocation(
+            "Comment on block",
+            "Block Author",
+            "fig-3a"
+        )
+        every { documentRepository.findById(documentId) } returns Optional.of(document)
+        every { commentRepository.save(any<Comment>()) } returns savedComment
+
+        // When
+        val result = commentService.createComment(documentId, createDto)
+
+        // Then
+        assertEquals("Comment on block", result.content)
+        val location = result.location as? BlockIdLocation
+        assertNotNull(location)
+        assertEquals("fig-3a", location.blockId)
+        verify { documentRepository.findById(documentId) }
+        verify { commentRepository.save(any<Comment>()) }
+    }
+
+    @Test
     fun `createComment should throw DocumentNotFoundException when document not exists`() {
         // Given
         val documentId = UUID.randomUUID()
-        val locationDto = CommentLocationDto(startChar = 0, endChar = 4)
+        val locationDto = CharRangeLocation(startChar = 0, endChar = 4)
         val createDto = CommentCreateDto(
             content = "Test comment",
             author = "Test Author",
@@ -115,8 +156,8 @@ class CommentServiceTest {
     fun `createComment should throw InvalidCommentLocationException when startChar exceeds content length`() {
         // Given
         val documentId = UUID.randomUUID()
-        val document = createMockDocument("Test Doc", "Short")
-        val locationDto = CommentLocationDto(startChar = 100, endChar = 105)
+        val document = createMockDocument("Test Doc", "Short", listOf())
+        val locationDto = CharRangeLocation(startChar = 100, endChar = 105)
         val createDto = CommentCreateDto(
             content = "Test comment",
             author = "Test Author",
@@ -135,8 +176,8 @@ class CommentServiceTest {
     fun `createComment should throw InvalidCommentLocationException when anchor text not found`() {
         // Given
         val documentId = UUID.randomUUID()
-        val document = createMockDocument("Test Doc", "This is a test document")
-        val locationDto = CommentLocationDto(anchorText = "nonexistent text")
+        val document = createMockDocument("Test Doc", "This is a test document", listOf())
+        val locationDto = AnchorLocation(anchorText = "nonexistent text")
         val createDto = CommentCreateDto(
             content = "Test comment",
             author = "Test Author",
@@ -155,21 +196,33 @@ class CommentServiceTest {
         return Comment(
             id = UUID.randomUUID(),
             createdAt = LocalDateTime.now(),
-            content = content,
+            comment = content,
             author = author,
-            location = CommentLocation(anchorText = "nonexistent text"),
-            document = createMockDocument("Test", "Test content")
+            location = AnchorLocation(anchorText = "nonexistent text"),
+            document = createMockDocument("Test", "Test content", listOf())
         )
     }
 
-    private fun createMockDocument(title: String, content: String): Document {
+    private fun createMockCommentWithBlockLocation(content: String, author: String, blockId: String): Comment {
+        return Comment(
+            id = UUID.randomUUID(),
+            createdAt = LocalDateTime.now(),
+            comment = content,
+            author = author,
+            location = BlockIdLocation(blockId = blockId),
+            document = createMockDocument("Test", "Test content", listOf(DocumentBlock(blockId, "figure", "Content")))
+        )
+    }
+
+    private fun createMockDocument(title: String, content: String, blocks: List<DocumentBlock>): Document {
         return Document(
             id = UUID.randomUUID(),
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now(),
             comments = mutableListOf(),
             title = title,
-            content = content
+            content = content,
+            blocks = blocks
         )
     }
 }

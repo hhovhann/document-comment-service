@@ -1,5 +1,6 @@
 package am.hhovhann.document_comment_service.dto
 
+import am.hhovhann.document_comment_service.entity.DocumentBlock
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.PositiveOrZero
 import jakarta.validation.constraints.Size
@@ -10,6 +11,7 @@ data class DocumentResponseDto(
     val id: UUID,
     val title: String,
     val content: String,
+    val blocks: List<DocumentBlock>,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
     val commentCount: Int = 0,
@@ -22,7 +24,9 @@ data class DocumentCreateDto(
     val title: String,
 
     @field:NotBlank(message = "Content cannot be blank")
-    val content: String
+    val content: String,
+
+    val blocks: List<DocumentBlock> = emptyList(),
 )
 
 data class DocumentUpdateDto(
@@ -32,5 +36,7 @@ data class DocumentUpdateDto(
     val content: String?,
 
     @field:PositiveOrZero(message = "Content must be positive")
-    val version: Long
+    val version: Long,
+
+    val blocks: List<DocumentBlock> = emptyList(),
 )

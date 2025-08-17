@@ -1,8 +1,8 @@
 package am.hhovhann.document_comment_service.controller
 
 import am.hhovhann.document_comment_service.dto.CommentCreateDto
-import am.hhovhann.document_comment_service.dto.CommentLocationDto
 import am.hhovhann.document_comment_service.dto.CommentResponseDto
+import am.hhovhann.document_comment_service.dto.location.CharRangeLocation
 import am.hhovhann.document_comment_service.exception.DocumentNotFoundException
 import am.hhovhann.document_comment_service.service.CommentService
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -17,7 +17,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.time.LocalDateTime
 import java.util.*
@@ -80,7 +81,7 @@ class CommentControllerTest {
     fun `POST create comment should return 201 with created comment`() {
         // Given
         val documentId = UUID.randomUUID()
-        val locationDto = CommentLocationDto(startChar = 0, endChar = 4)
+        val locationDto = CharRangeLocation(startChar = 0, endChar = 4)
         val createDto = CommentCreateDto(
             content = "Test comment",
             author = "Test Author",
@@ -107,7 +108,7 @@ class CommentControllerTest {
             id = UUID.randomUUID(),
             content = content,
             author = author,
-            location = CommentLocationDto(startChar = 0, endChar = 4),
+            location = CharRangeLocation(startChar = 0, endChar = 4),
             createdAt = LocalDateTime.now(),
             documentId = UUID.randomUUID()
         )
